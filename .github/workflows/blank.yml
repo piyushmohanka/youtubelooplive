@@ -1,0 +1,30 @@
+name: 24-7-Stream
+
+on:
+  workflow_dispatch:
+
+jobs:
+  stream:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          pip install yt-dlp
+
+      - name: Download Video
+        run: |
+          # Naya Google Drive ID yahan update kar diya gaya hai
+          yt-dlp -f "best[ext=mp4]" "https://drive.google.com/uc?export=download&id=1JnFhgqZmcfgorgcVEEBa-HKKGxCL_aY7" -o video.mp4
+
+      - name: Start Stream
+        run: |
+          # Loop, Audio Sync aur Vertical Format ka fix yahan hai
+          ffmpeg -re -stream_loop -1 -i video.mp4 \
+          -vf "crop=ih*9/16:ih,scale=720:1280,format=yuv420p" \
+          -c:v libx264 -preset ultrafast -r 30 -g 60 -b:v 3000k -maxrate 3000k -bufsize 6000k \
+          -af "aresample=async=1" -c:a aac -ar 44100 -b:a 128k \
+          -f flv "rtmps://a.rtmp.youtube.com:443/live2/${{ secrets.STREAM_KEY }}"
