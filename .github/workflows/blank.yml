@@ -22,9 +22,9 @@ jobs:
 
       - name: Start Stream
         run: |
-          # Loop, Audio Sync aur horizontal Format ka fix yahan hai
+          # Loop, Audio Sync aur Vertical Format ka fix yahan hai
           ffmpeg -re -stream_loop -1 -i video.mp4 \
-          -vf "crop=ih*16/9:ih,scale=1280:720,format=yuv420p" \
+          -vf "crop=ih*9/16:ih,scale=720:1280,format=yuv420p" \
           -c:v libx264 -preset ultrafast -r 30 -g 60 -b:v 3000k -maxrate 3000k -bufsize 6000k \
           -af "aresample=async=1" -c:a aac -ar 44100 -b:a 128k \
           -f flv "rtmps://a.rtmp.youtube.com:443/live2/${{ secrets.STREAM_KEY }}"
